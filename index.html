@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#dff3ff">
+  <title>Índices de Endividamento | Professor Moreira</title>
+  <style>
+    * { box-sizing: border-box; }
+    html, body { margin: 0; min-height: 100%; }
+    body {
+      min-height: 100vh;
+      min-height: 100dvh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #dff3ff;
+      font-family: Arial, Helvetica, sans-serif;
+      color: #063b68;
+      overflow: hidden;
+      touch-action: pan-y;
+    }
+    .app {
+      width: min(100%, 900px);
+      min-height: 100vh;
+      min-height: 100dvh;
+      display: flex;
+      flex-direction: column;
+      padding: max(10px, env(safe-area-inset-top)) 10px max(10px, env(safe-area-inset-bottom));
+    }
+    .topo {
+      flex: 0 0 auto;
+      text-align: center;
+      font-weight: 800;
+      font-size: clamp(17px, 4vw, 24px);
+      margin: 2px 0 8px;
+    }
+    .palco {
+      flex: 1 1 auto;
+      min-height: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+    #card {
+      display: block;
+      max-width: 100%;
+      max-height: calc(100dvh - 145px);
+      width: auto;
+      height: auto;
+      object-fit: contain;
+      border-radius: 14px;
+      box-shadow: 0 5px 18px rgba(0,0,0,.18);
+      background: white;
+    }
+    .rodape {
+      flex: 0 0 auto;
+      padding-top: 9px;
+    }
+    .contador {
+      text-align: center;
+      font-size: 18px;
+      font-weight: 800;
+      margin-bottom: 8px;
+    }
+    .controles {
+      display: grid;
+      grid-template-columns: 1fr 1.35fr 1fr;
+      gap: 8px;
+    }
+    button {
+      border: 0;
+      border-radius: 12px;
+      min-height: 48px;
+      padding: 10px 12px;
+      background: #07599b;
+      color: white;
+      font-size: 20px;
+      font-weight: 800;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+    }
+    button:active { transform: scale(.98); }
+    button:disabled { opacity: .38; cursor: default; }
+    #reiniciar { background: #c62828; font-size: 16px; }
+    .dica {
+      text-align: center;
+      font-size: 12px;
+      opacity: .75;
+      margin-top: 6px;
+    }
+    @media (orientation: landscape) and (max-height: 600px) {
+      .topo { display: none; }
+      #card { max-height: calc(100dvh - 78px); }
+      .dica { display: none; }
+      .rodape { padding-top: 5px; }
+      .contador { margin-bottom: 4px; font-size: 15px; }
+      button { min-height: 40px; }
+    }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <div class="topo">Índices de Endividamento — Professor Moreira</div>
+
+    <section class="palco" id="palco" aria-live="polite">
+      <img id="card" src="imagens/card-01.webp" alt="Questões 1 e 2" draggable="false">
+    </section>
+
+    <footer class="rodape">
+      <div class="contador" id="contador">1 / 5</div>
+      <div class="controles">
+        <button id="voltar" aria-label="Imagem anterior">←</button>
+        <button id="reiniciar">↻ Reiniciar</button>
+        <button id="avancar" aria-label="Próxima imagem">→</button>
+      </div>
+      <div class="dica">Deslize para a esquerda ou direita para navegar.</div>
+    </footer>
+  </main>
+
+  <script>
+    const total = 5;
+    let atual = 1;
+
+    const card = document.getElementById('card');
+    const contador = document.getElementById('contador');
+    const voltar = document.getElementById('voltar');
+    const avancar = document.getElementById('avancar');
+    const reiniciar = document.getElementById('reiniciar');
+    const palco = document.getElementById('palco');
+
+    const caminho = n => `imagens/card-${String(n).padStart(2, '0')}.webp`;
+
+    function preload(n) {
+      if (n < 1 || n > total) return;
+      const img = new Image();
+      img.src = caminho(n);
+    }
+
+    function mostrar(n) {
+      atual = Math.max(1, Math.min(total, n));
+      card.src = caminho(atual);
+      card.alt = `Imagem ${atual} de ${total} — questões ${atual * 2 - 1} e ${atual * 2}`;
+      contador.textContent = `${atual} / ${total}`;
+      voltar.disabled = atual === 1;
+      avancar.disabled = atual === total;
+      preload(atual + 1);
+      preload(atual - 1);
+    }
+
+    voltar.addEventListener('click', () => mostrar(atual - 1));
+    avancar.addEventListener('click', () => mostrar(atual + 1));
+    reiniciar.addEventListener('click', () => mostrar(1));
+
+    document.addEventListener('keydown', e => {
+      if (e.key === 'ArrowLeft') mostrar(atual - 1);
+      if (e.key === 'ArrowRight') mostrar(atual + 1);
+      if (e.key === 'Home') mostrar(1);
+    });
+
+    let inicioX = 0;
+    let inicioY = 0;
+
+    palco.addEventListener('touchstart', e => {
+      const t = e.changedTouches[0];
+      inicioX = t.clientX;
+      inicioY = t.clientY;
+    }, { passive: true });
+
+    palco.addEventListener('touchend', e => {
+      const t = e.changedTouches[0];
+      const dx = t.clientX - inicioX;
+      const dy = t.clientY - inicioY;
+
+      if (Math.abs(dx) > 45 && Math.abs(dx) > Math.abs(dy)) {
+        if (dx < 0) mostrar(atual + 1);
+        else mostrar(atual - 1);
+      }
+    }, { passive: true });
+
+    mostrar(1);
+  </script>
+</body>
+</html>
