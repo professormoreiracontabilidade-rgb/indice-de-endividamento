@@ -107,7 +107,7 @@
     <div class="topo">Índices de Endividamento — Professor Moreira</div>
 
     <section class="palco" id="palco" aria-live="polite">
-      <img id="card" src="imagens/card-01.webp" alt="Questões 1 e 2" draggable="false">
+      <img id="card" src="card-01.webp" alt="Questões 1 e 2" draggable="false">
     </section>
 
     <footer class="rodape">
@@ -132,7 +132,7 @@
     const reiniciar = document.getElementById('reiniciar');
     const palco = document.getElementById('palco');
 
-    const caminho = n => `imagens/card-${String(n).padStart(2, '0')}.webp`;
+    const caminho = n => `card-${String(n).padStart(2, '0')}.webp`;
 
     function preload(n) {
       if (n < 1 || n > total) return;
